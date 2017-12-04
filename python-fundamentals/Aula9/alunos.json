@@ -1,0 +1,29 @@
+{
+    
+    "nome":"Felipe",
+    "email":"moz.felipe@gmail.com",
+    "cursos":[
+                { 
+                    "nome":"python 1",
+                    "id":520
+                },
+                {
+                    "nome":"sysadmin",
+                    "id":450
+                }
+            ]
+},
+{
+    "nome":"Joaozinho",
+    "email":"joao@gmail.com",
+    "cursos":[
+                { 
+                    "nome":"python 1",
+                    "id":520
+                },
+                {
+                    "nome":"sysadmin",
+                    "id":450
+                }
+            ]
+}

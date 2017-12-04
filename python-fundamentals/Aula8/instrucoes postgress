@@ -1,0 +1,8 @@
+sudo su - postgres
+apt-get install postgresql
+psql
+
+CREATE USER admin PASSWORD '4linux';
+CREATE DATABASE escola OWNER admin;
+
+psql -h localhost -U admin escola
