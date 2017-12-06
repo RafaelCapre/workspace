@@ -18,9 +18,8 @@ A step by step series of examples that tell you have to get a development env ru
 
 Say what the step will be
 
-apt-get install python3-pip
-apt-get install pymongo
-apt-get install psycopg2
+apt-get install python3-pip pymongo psycopg2
+
 
 Doubts? google it.
 
