@@ -1,22 +1,20 @@
 #0. Sign in
-#0. Sign in
-$azureCredential = Get-AutomationPSCredential -Name 'azureautomation' #Automation credential for Azure login
+$azureCredential = Get-AutomationPSCredential -Name 'azureautomation'
 $azureCredential
 Login-AzureRmAccount -Credential $azureCredential
 
 #1. Select the subscription to use
-$subscriptionID = Get-AutomationVariable -Name 'subscription-id' #Automation variable for subscription id
+$subscriptionID = Get-AutomationVariable -Name 'subscription-id'
 Select-AzureRmSubscription -SubscriptionId $subscriptionID
 Write-Output "Subscription: " $subscriptionID 
 
 #2. Cluster Variables
-$resourceGroupName = "PRD-Dir-BI-Analytics" #Provide Resource Group Name
-$storageAccountName = "analyticsprdstorage" #Provide Storage Account Name
-$containerName = "prd01ingestion-analytics" #Provide Blob Container
-$storageAccountKey = Get-AutomationVariable -Name 'analyticsdevstoragekey'
+$resourceGroupName = "PRD-Dir-BI-Analytics"
+$storageAccountName = "analyticsprdstorage"
+$containerName = "prd01ingestion-analytics"
 $clusterName = $containerName 
-$clusterCredential = Get-AutomationPSCredential -Name 'cred-dev-spark-analytics-admin'
-$sshCredential = Get-AutomationPSCredential -Name 'cred-dev-spark-analytics-sshuser'
+$clusterCredential = Get-AutomationPSCredential -Name 'cred-prd-spark-analytics-admin'
+$sshCredential = Get-AutomationPSCredential -Name 'cred-prd-spark-analytics-sshuser'
 $clusterType = "Spark"
 $hdpversion = "3.6"
 $clusterOS = "Linux"
@@ -34,13 +32,10 @@ $location           = Get-AutomationVariable -Name 'Location_BR'
 $VirtualNetworkId   = "/subscriptions/" + $subscriptionID + "/resourceGroups/RedeNaturaGeral/providers/Microsoft.Network/virtualNetworks/" + $net
 $SubnetName         = $VirtualNetworkId + "/subnets/SUBNETNATPRD-AZ1-Private"
 
-
 #2.3. Dynamic StorageKey
 $primaryStorageAcctName = $storageAccountName
 $primaryStorageResourceGroupName = $resourceGroupName
 $storageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $primaryStorageResourceGroupName -Name $primaryStorageAcctName).Value[0]
-
-
 
 #3. Database Metastore
 Write-Output "Definindo Hive Metastore"
@@ -73,19 +68,20 @@ New-AzureRmHDInsightClusterConfig -ClusterType $clusterType `
         -DefaultStorageAccountName "$storageAccountName.blob.core.windows.net" `
         -DefaultStorageAccountKey $storageAccountKey `
         -DefaultStorageContainer $containerName 
+
 Write-Output "Cluster no ar" 
 
 #5 ActionScripts
 #5.1 Constantes:
 $BLOB_NAME = "naturaanalytics"
 $BLOB_KEY = Get-AutomationVariable -Name 'naturaanalyticskey'
-$ENV = "dev"
+$ENV = "prd"
 $CLUSTER_NAME = $containerName 
 $CLUSTER_USER = $clusterCredential.UserName
     $SecurePassword = $clusterCredential.Password 
     $BSTR =  [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecurePassword)
 $CLUSTER_PASS = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
-$CLUSTER_CREDENTIAL_PASS = Get-AutomationVariable -Name 'oracle-prd-userdataleke-pwd'
+#$CLUSTER_CREDENTIAL_PASS = Get-AutomationVariable -Name 'oracle-prd-userdataleke-pwd'
 
 Write-Output "ActionScript: add_hosts.sh (HeadNodea)"
 Submit-AzureRmHDInsightScriptAction `
@@ -112,7 +108,7 @@ Submit-AzureRmHDInsightScriptAction `
     -ClusterName $clusterName `
     -Name "add modules" `
     -NodeTypes "HeadNode" `
-    -Parameters " "`
+    -Parameters " " `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_modules.sh
 Write-Output "============================================================"
@@ -122,7 +118,7 @@ Submit-AzureRmHDInsightScriptAction `
     -ClusterName $clusterName `
     -Name "add dynatrace" `
     -NodeTypes "HeadNode" `
-    -Parameters " "`
+    -Parameters " " `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_dynatrace.sh
 Write-Output "============================================================"
@@ -173,7 +169,7 @@ Submit-AzureRmHDInsightScriptAction `
     -ClusterName $clusterName `
     -Name "add yarn config caa debug" `
     -NodeTypes "HeadNode" `
-    -Parameters "wasb://startup@analyticsdevstorage.blob.core.windows.net/action-script/yarn_capacity_caa.json $CLUSTER_NAME $CLUSTER_PASS"`
+    -Parameters "wasb://startup@$storageAccountName.blob.core.windows.net/action-script/yarn_capacity_caa.json $CLUSTER_NAME $CLUSTER_PASS"`
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/yarn_capacity_scheduler.sh `
     -debug
@@ -185,7 +181,7 @@ Submit-AzureRmHDInsightScriptAction `
     -ClusterName $clusterName `
     -Name "add cleanup" `
     -NodeTypes "HeadNode" `
-    -Parameters " "`
+    -Parameters " " `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_cleanup.sh
 Write-Output "============================================================"
@@ -199,15 +195,3 @@ Submit-AzureRmHDInsightScriptAction `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_hdfs_credential.sh
 Write-Output "============================================================"
-
-<#
-Write-Output "ActionScript: Restart YARN"
-Submit-AzureRmHDInsightScriptAction `
-    -ClusterName $clusterName `
-    -Name "restart cluster" `
-    -NodeTypes "HeadNode" `
-    -Parameters "$CLUSTER_NAME $CLUSTER_USER $CLUSTER_PASS"`
-    -ResourceGroupName "$resourceGroupName" `
-    -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/restart_cluster.sh
-Write-Output "============================================================"
-#>

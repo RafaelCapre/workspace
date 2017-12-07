@@ -154,12 +154,12 @@ Submit-AzureRmHDInsightScriptAction `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_bash2rest_crontab.sh
 Write-Output "============================================================"
 
-Write-Output "ActionScript: Add YARN Config CAA"
+Write-Output "ActionScript: Add YARN Config Integra"
 Submit-AzureRmHDInsightScriptAction `
     -ClusterName $clusterName `
     -Name "add yarn config caa debug" `
     -NodeTypes "HeadNode" `
-    -Parameters "wasb://startup@analyticsdevstorage.blob.core.windows.net/action-script/yarn_capacity_caa.json $CLUSTER_NAME $CLUSTER_PASS"`
+    -Parameters "wasb://startup@$storageAccountName.blob.core.windows.net/action-script/yarn_capacity_integra.json $CLUSTER_NAME $CLUSTER_PASS"`
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/yarn_capacity_scheduler.sh `
     -debug
