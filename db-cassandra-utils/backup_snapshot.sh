@@ -102,4 +102,4 @@ azcopy \
     --dest-key $_BLOB_KEY \
     --recursive
     --exclude-older
-    --parallel-leve
+    --parallel-level 2
