@@ -1,15 +1,3 @@
-#==============================================================================
-#title           :start-dev-spark-analytics2
-#description     :This script must run to setup Natura configurations and customizations of HDInsight Cluster DEV-Analytics 2
-#author          :b95142
-#date            :2017-11-16
-#version         :7
-#usage           :Any spark cluster
-#notes           :
-#bash_version    :4.3.11(1)-release
-#Runbook         :big-data-automation
-#==============================================================================
-
 #0. Sign in
 $azureCredential = Get-AutomationPSCredential -Name 'azureautomation' #Automation credential for Azure login
 $azureCredential
@@ -31,7 +19,7 @@ $sshCredential = Get-AutomationPSCredential -Name 'cred-dev-spark-analytics-sshu
 $clusterType = "Spark"
 $hdpversion = "3.6"
 $clusterOS = "Linux"
-$clusterNodes =  
+$clusterNodes = 4 
 $clusterNodeSize = "Standard_D12"
 $clusterHeadSize = "Standard_D12"
 $location = Get-AutomationVariable -Name 'Location_BR'
@@ -46,6 +34,7 @@ $sqlAzureServerName = "hivemetadatahdidevserver.database.windows.net"
 $DatabaseName = "HiveMetadadaDevSpark" 
 $DBCredential = Get-AutomationPSCredential -Name 'cred-dev-sqlmetadata-adminsql'
 $MetastoreType = "HiveMetaStore"
+
 
 #4. Deploy
 Write-Output "Executando:" 
@@ -71,6 +60,7 @@ New-AzureRmHDInsightClusterConfig -ClusterType $clusterType `
         -DefaultStorageContainer $containerName 
 Write-Output "Cluster no ar" 
 
+
 #5 ActionScripts
 #5.1 Constantes:
 $BLOB_NAME = "naturaanalytics"
@@ -82,15 +72,13 @@ $CLUSTER_USER = $clusterCredential.UserName
     $BSTR =  [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecurePassword)
 $CLUSTER_PASS = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
 $CLUSTER_CREDENTIAL_PASS = Get-AutomationVariable -Name 'oracle-prd-userdataleke-pwd'
-$CLUSTER_YARN_CONFIG_PATH = 'wasb://analyticsdevstorage.blob.core.windows.net/startup/yarn_queues_config.sh'
 
-Write-Output "ActionScript: add_hosts.sh (HeadNode)"
+Write-Output "ActionScript: add_hosts.sh (HeadNodea)"
 Submit-AzureRmHDInsightScriptAction `
     -ClusterName $clusterName `
     -Name "add hosts headnode" `
     -NodeTypes "HeadNode" `
     -Parameters " "`
-    -PersistOnSuccess `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_hosts.sh 
 Write-Output "============================================================"
@@ -101,21 +89,8 @@ Submit-AzureRmHDInsightScriptAction `
     -Name "add hosts workernode" `
     -NodeTypes "WorkerNode" `
     -Parameters " "`
-    -PersistOnSuccess `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_hosts.sh 
-Write-Output "============================================================"
-
-Write-Output "ActionScript: Add YARN Config"
-Submit-AzureRmHDInsightScriptAction `
-    -ClusterName $clusterName `
-    -Name "add yarn config" `
-    -NodeTypes "HeadNode" `
-    -Parameters "$CLUSTER_NAME $CLUSTER_USER $CLUSTER_PASS $CLUSTER_YARN_CONFIG_PATH"`
-    -PersistOnSuccess `
-    -ResourceGroupName "$resourceGroupName" `
-    -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_yarn_conf.sh `
-    -debug
 Write-Output "============================================================"
 
 Write-Output "ActionScript: Add Modules"
@@ -124,7 +99,6 @@ Submit-AzureRmHDInsightScriptAction `
     -Name "add modules" `
     -NodeTypes "HeadNode" `
     -Parameters " "`
-    -PersistOnSuccess `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_modules.sh
 Write-Output "============================================================"
@@ -135,7 +109,6 @@ Submit-AzureRmHDInsightScriptAction `
     -Name "add dynatrace" `
     -NodeTypes "HeadNode" `
     -Parameters " "`
-    -PersistOnSuccess `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_dynatrace.sh
 Write-Output "============================================================"
@@ -143,10 +116,9 @@ Write-Output "============================================================"
 Write-Output "ActionScript: Add Sqoop Configuration"
 Submit-AzureRmHDInsightScriptAction `
     -ClusterName $clusterName `
-    -Name "add sqoop config" `
+    -Name "add sqoop config debug" `
     -NodeTypes "HeadNode" `
     -Parameters "$BLOB_NAME $ENV"`
-    -PersistOnSuccess `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_sqoop_config.sh `
     -debug
@@ -158,7 +130,6 @@ Submit-AzureRmHDInsightScriptAction `
     -Name "add naturaanalytics" `
     -NodeTypes "HeadNode" `
     -Parameters "$BLOB_NAME $BLOB_KEY"`
-    -PersistOnSuccess `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://hdiconfigactions.blob.core.windows.net/linuxaddstorageaccountv01/add-storage-account-v01.sh 
 Write-Output "============================================================"
@@ -169,7 +140,6 @@ Submit-AzureRmHDInsightScriptAction `
     -Name "add bash2rest" `
     -NodeTypes "HeadNode" `
     -Parameters "$BLOB_NAME $ENV $CLUSTER_NAME"`
-    -PersistOnSuccess `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_bash2rest.sh
 Write-Output "============================================================"
@@ -180,10 +150,21 @@ Submit-AzureRmHDInsightScriptAction `
     -Name "add bash2rest crontab" `
     -NodeTypes "HeadNode" `
     -Parameters "$BLOB_NAME $ENV $CLUSTER_NAME"`
-    -PersistOnSuccess `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_bash2rest_crontab.sh
 Write-Output "============================================================"
+
+Write-Output "ActionScript: Add YARN Config CAA"
+Submit-AzureRmHDInsightScriptAction `
+    -ClusterName $clusterName `
+    -Name "add yarn config caa debug" `
+    -NodeTypes "HeadNode" `
+    -Parameters "wasb://startup@analyticsdevstorage.blob.core.windows.net/action-script/yarn_capacity_caa.json $CLUSTER_NAME $CLUSTER_PASS"`
+    -ResourceGroupName "$resourceGroupName" `
+    -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/yarn_capacity_scheduler.sh `
+    -debug
+Write-Output "============================================================"
+
 
 Write-Output "ActionScript: Limpa arquivos obsoletos"  
 Submit-AzureRmHDInsightScriptAction `
@@ -191,7 +172,6 @@ Submit-AzureRmHDInsightScriptAction `
     -Name "add cleanup" `
     -NodeTypes "HeadNode" `
     -Parameters " "`
-    -PersistOnSuccess `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_cleanup.sh
 Write-Output "============================================================"
@@ -202,18 +182,19 @@ Submit-AzureRmHDInsightScriptAction `
     -Name "add hdfs credential" `
     -NodeTypes "HeadNode" `
     -Parameters "$CLUSTER_NAME $CLUSTER_CREDENTIALS_PASS $BLOB_CONTAINER"`
-    -PersistOnSuccess `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/add_hdfs_credential.sh
 Write-Output "============================================================"
 
+<#
 Write-Output "ActionScript: Restart YARN"
 Submit-AzureRmHDInsightScriptAction `
     -ClusterName $clusterName `
     -Name "restart cluster" `
     -NodeTypes "HeadNode" `
     -Parameters "$CLUSTER_NAME $CLUSTER_USER $CLUSTER_PASS"`
-    -PersistOnSuccess `
     -ResourceGroupName "$resourceGroupName" `
     -Uri https://$storageAccountName.blob.core.windows.net/startup/action-script/restart_cluster.sh
 Write-Output "============================================================"
+
+#>
