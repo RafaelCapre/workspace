@@ -3,7 +3,7 @@ _BACKUP_DIR=/cassandra/backup
 _DATA_DIR=/cassandra/data
 _NODETOOL=nodetool
 _BLOB_KEY=$1
-_BLOB="https://cassandradevdata.blob.core.windows.net/backup"
+_BLOB="cassandradevdata"
 
 
 ## Do not edit below given variable ##
@@ -82,7 +82,6 @@ fi
 done
 
 ### Copy default Snapshot dir to backup dir
-
 find $_DATA_DIR -type d -name $_SNAPSHOT_NAME > snp_dir_list
 
 for SNP_VAR in `cat snp_dir_list`;
@@ -97,15 +96,10 @@ done
 
 # Azcopy
 
-for SNP_VAR in `cat snp_dir_list`;
-do
-## Triming _DATA_DIR
-_SNP_PATH_TRIM=`echo $SNP_VAR|awk '{gsub("'$_DATA_DIR'", "");print}'`
-
 azcopy \
-    --source $_BACKUP_SNAPSHOT_DIR$_SNP_PATH_TRIM \
-    --destination $_BLOB \
+    --source $_BACKUP_DIR/$_TODAY_DATE \
+    --destination "https://$BLOB.blob.core.windows.net/backup" \
     --dest-key $_BLOB_KEY \
     --recursive
-
-done
+    --exclude-older
+    --parallel-level 2
