@@ -1,10 +1,4 @@
 #!/bin/bash
-#Author - Ratish Maruthiyodan
-#Modified by - Kuldeep Kulkarni to add:
-#1. bootstrap function for installing required openstack client packages.
-#2. Fixed hostname issue
-#3. Time tracking
-#4. Fixed network selection pattern
 #Purpose - Script to Create Instance based on the parameters received from cluster.props file
 ##########################################################
 echo `date +%s` > /tmp/start_time

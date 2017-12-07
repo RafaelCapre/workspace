@@ -1,6 +1,4 @@
 #!/bin/bash
-#Author - KK [ Kuldeep Kulkarni ]
-#Website - http://crazyadmins.com
 #Note - nc-1.84-22.el6.x86_64 or greater version of netcat package is required in order to get this script working!
 
 #Globals

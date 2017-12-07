@@ -1,6 +1,5 @@
 #!/bin/bash
-#Author - Kuldeep Kulkarni
-#Contributor - Ratish Maruthiyodan
+
 #Script will setup and configure ambari-server/ambari-agents and hdp cluster
 ##########################################################
 if [ $# -ne 1 ]

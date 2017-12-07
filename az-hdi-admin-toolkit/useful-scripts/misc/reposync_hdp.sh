@@ -1,5 +1,4 @@
 #!/bin/bash
-#Author - Kuldeep Kulkarni
 #Script to sync hdp/ambari repositories
 ########################################
 
