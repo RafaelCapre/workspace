@@ -11,7 +11,6 @@ sudo wget "https://"${BLOB_NAME}".blob.core.windows.net/"${ENV}"/util/sqoop/jars
 cd /usr/hdp/current/sqoop-client/conf
 sudo sh -c 'hdfs dfs -cat "wasb://'${ENV}@${BLOB_NAME}'.blob.core.windows.net/util/sqoop/sqoop-site.xml" > /usr/hdp/current/sqoop-client/conf/sqoop-site.xml'
 #sudo rm -r /usr/hdp/current/sqoop-client/conf/sqoop-site.xml 
-#sudo wget "https://"${BLOB_NAME}".blob.core.windows.net/"${ENV}"/util/sqoop/sqoop-site.xml" 
 sudo chown sqoop:hadoop /usr/hdp/current/sqoop-client/conf/sqoop-site.xml
 sudo chown sshuser:sshuser /home/sshuser/.sqoop
 echo "OK" ${NOW} >> /home/sshuser/start-log.out
