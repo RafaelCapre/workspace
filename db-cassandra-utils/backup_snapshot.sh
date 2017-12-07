@@ -100,6 +100,4 @@ azcopy \
     --source $_BACKUP_DIR/$_TODAY_DATE \
     --destination "https://$BLOB.blob.core.windows.net/backup" \
     --dest-key $_BLOB_KEY \
-    --recursive \ 
-    --exclude-older \ 
-    --parallel-level 2
+    --recursive
