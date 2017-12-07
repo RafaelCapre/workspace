@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-_BACKUP_DIR=/app/cassandra/backup
+_BACKUP_DIR=/cassandra/backup
 _DATA_DIR=/cassandra/data
 _NODETOOL=nodetool
-$BLOB_KEY="XjhoNuUthm2szmXwN2mrclLut9ONWG0WB754fIzq98m8491vy863IUDUxT+JfrP8bNOrZpvbIEoMhCpptxHDgg=="
-$BLOB="https://cassandradevdata.blob.core.windows.net/backup"
+_BLOB_KEY=$1
+_BLOB="https://cassandradevdata.blob.core.windows.net/backup"
 
 
 ## Do not edit below given variable ##
@@ -104,8 +104,8 @@ _SNP_PATH_TRIM=`echo $SNP_VAR|awk '{gsub("'$_DATA_DIR'", "");print}'`
 
 azcopy \
     --source $_BACKUP_SNAPSHOT_DIR$_SNP_PATH_TRIM \
-    --destination $BLOB \
-    --dest-key $BLOB_KEY \
+    --destination $_BLOB \
+    --dest-key $_BLOB_KEY \
     --recursive
 
 done
