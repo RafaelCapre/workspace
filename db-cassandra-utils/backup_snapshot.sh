@@ -92,11 +92,8 @@ _SNP_PATH_TRIM=`echo $SNP_VAR|awk '{gsub("'$_DATA_DIR'", "");print}'`
 cp -prvf "$SNP_VAR" "$_BACKUP_SNAPSHOT_DIR$_SNP_PATH_TRIM";
 
 done
-    
+
 # Azcopy
 
 azcopy \
-    --source $_BACKUP_DIR/$_TODAY_DATE \
-    --destination "https://$BLOB.blob.core.windows.net/backup" \
-    --dest-key $_BLOB_KEY \
-    --recursive
+    --source $_BACKUP_DIR/$_TODAY_DATE --destination "https://$BLOB.blob.core.windows.net/backup" --dest-key $_BLOB_KEY --recursive
