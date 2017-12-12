@@ -20,7 +20,9 @@ for i in "${array[@]}"
 	do
     	$KAFKA_HOME/kafka-topics.sh --zookeeper $ZOO --create --if-not-exists --topic $i  --partitions 2 --replication-factor 2 
 	done
-	
+
+echo "*** Lista de Tópicos Criados ***"
 sudo $KAFKA_HOME/kafka-topics.sh --zookeeper $ZOO --list 
-	
+echo " \n"
+
 echo "DONE: " `date` 
