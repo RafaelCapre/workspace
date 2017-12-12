@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-
-#kafkadev O2JPIPYwMD79@
-
 CLUSTER_NAME=$1
 CLUSTER_PASS=$2
 ZOO=$(curl -u admin:$CLUSTER_PASS -X GET "https://"$CLUSTER_NAME".azurehdinsight.net/api/v1/clusters/"$CLUSTER_NAME"/services/ZOOKEEPER/components/ZOOKEEPER_SERVER" | jq .host_components[].HostRoles.host_name | sed 's/"//g' | sed -z "s/\n/:2181,/g")
