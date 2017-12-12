@@ -1,0 +1,9 @@
+event-management
+explosao-objetivos
+extincao-grupos
+extincao-grupos
+remuneracao
+remuneracao-simulacao
+remuneracao-simulacao-2
+reward-simulation
+reward-simulation-2

@@ -1,0 +1,142 @@
+Write-Output "Start: " 
+
+#0. Sign in
+    $azureCredential = Get-AutomationPSCredential -Name 'azureautomation'
+    Login-AzureRmAccount -Credential $azureCredential
+
+#1. Select the subscription to use
+    $subscriptionID = Get-AutomationVariable -Name 'subscription-id'
+    Select-AzureRmSubscription -SubscriptionId $subscriptionID
+
+#2. Variables
+    #2.1. Constants Variables :
+        $resourceGroupName  = "PRD-Dir-BI-Analytics"
+        $storageAccountName = "analyticsprdstorage"
+        $containerName      = "prd01ingestion-analytics"
+        $clusterType        = "Spark"
+        $hdpversion         = "3.6"
+        $clusterOS          = "Linux"
+        $clusterNodes       = 4 
+        $clusterNodeSize    = "Standard_D12"
+        $clusterHeadSize    = "Standard_D12"
+  
+    #2.2. Dynamic Variables
+        $clusterName = $containerName
+        $clusterCredential  = Get-AutomationPSCredential -Name 'cred-prd-spark-ingestion01-admin'
+        $sshCredential      = Get-AutomationPSCredential -Name 'cred-prd-spark-ingestion01-sshuser' 
+        $net                = Get-AutomationVariable -Name 'Net'
+        $location           = Get-AutomationVariable -Name 'Location_BR'
+        $VirtualNetworkId   = "/subscriptions/" + $subscriptionID + "/resourceGroups/RedeNaturaGeral/providers/Microsoft.Network/virtualNetworks/" + $net
+        $SubnetName         = $VirtualNetworkId + "/subnets/SUBNETNATPRD-AZ1-Private"
+
+
+    #2.3. Dynamic StorageKey
+        $primaryStorageAcctName = $storageAccountName
+        $primaryStorageResourceGroupName = $resourceGroupName
+        $storageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $primaryStorageResourceGroupName -Name $primaryStorageAcctName).Value[0]
+
+
+
+#3. Database Metastore
+    Write-Output "Definindo Hive Metastore"
+    $dbconfig           = $clusterName 
+    $sqlAzureServerName = "hivemetadaprdanalyticsserver.database.windows.net"
+    $DatabaseName       = "HiveMetadadaPRD01IngestionAnalytics"
+    $DBCredential       = Get-AutomationPSCredential -Name 'cred-prd-spark-exploration01-adminsql'
+    $MetastoreType      = "HiveMetaStore"
+
+    
+
+#4. Action Script: Startup Script
+    Write-Output "Startup Script"
+
+    <#
+    BLOB_NAME (nome do storage account; exemplo: naturaanalytics)
+    BLOB_KEY (chave de acesso ao blob)
+    BLOB_CONTAINER (o container associado ao cluster onde o script está rodando, escrito em minúsculo; no caso de um cluster de produção, será o container prd, por exemplo)
+    CLUSTER_NAME (nome utilizado para o cluster; exemplo: prd01ingestion-analytics)
+    CLUSTER_USER (nome do usuário do ambari; normalmente é o usuário "admin")
+    CLUSTER_PASS (senha do ambari)
+    CLUSTER_CREDENTIALS_PASS (senha do banco de dados Oracle para o usuário USERDATALAKE)
+    CLUSTER_YARN_CONFIG_PATH (path para o arquivo sh de configuração de filas do YARN)
+    Parameter Order:
+        $BLOB_NAME=$1
+        $BLOB_KEY=$2
+        $BLOB_CONTAINER=$3
+        $CLUSTER_NAME=$4
+        $CLUSTER_USER=$5
+        $CLUSTER_PASS=$6
+        $CLUSTER_CREDENTIALS_PASS=$7
+        $CLUSTER_YARN_CONFIG_PATH=$8
+     #>
+        $BLOB_NAME = "naturaanalytics"
+        $BLOB_KEY = Get-AutomationVariable -Name 'naturaanalyticskey'
+        $BLOB_CONTAINER = "prd"
+        $CLUSTER_NAME = $containerName 
+        $CLUSTER_USER = $clusterCredential.UserName
+            $SecurePassword = $clusterCredential.Password 
+            $BSTR =  [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($SecurePassword)
+        $CLUSTER_PASS = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+        $CLUSTER_CREDENTIAL_PASS = Get-AutomationVariable -Name 'cred-prd-oracle-datalake-pwd'
+        $CLUSTER_YARN_CONFIG_PATH = 'wasb://startup@analyticsprdstorage.blob.core.windows.net/yarn_queues_config.sh'
+
+
+    $scriptActionUri="https://analyticsprdstorage.blob.core.windows.net/startup/startup-prd-exploration-analytics.sh"
+    $scriptActionName="Startupscript"
+    $scriptActionParameters = "$BLOB_NAME $BLOB_KEY $BLOB_CONTAINER $CLUSTER_NAME $CLUSTER_USER $CLUSTER_PASS $CLUSTER_CREDENTIAL_PASS $CLUSTER_YARN_CONFIG_PATH"
+
+    Write-Output "Script Parameters: $scriptActionParameters"
+
+#4.2 Action Script: Attaching NaturaAnalytics
+
+    $scriptActionAttachUri="https://hdiconfigactions.blob.core.windows.net/linuxaddstorageaccountv01/add-storage-account-v01.sh"
+    $scriptActionAttachName="Attach NaturaAnalytics"
+    $scriptActionAttachParameters="$BLOB_NAME $BLOB_KEY"
+
+
+#4. Destroy
+    Write-Output "Destroying..." + $clusterName
+
+        Remove-AzureRmHDInsightCluster `
+		    -ClusterName $clusterName  `
+		    -ResourceGroupName $resourceGroupName
+        
+    Write-Output "Cluster Destroyed."
+
+#5. Deploy
+    Write-Output "Deploying..." + $clusterName
+
+        New-AzureRmHDInsightClusterConfig -ClusterType $clusterType `
+            | Add-AzureRmHDInsightMetastore -Credential $DBCredential `
+                -Database $DatabaseName `
+                -MetaStoreType $MetastoreType `
+                -SqlAzureServerName $sqlAzureServerName `
+            | Add-AzureRmHDInsightScriptAction -Name $scriptActionName `
+                -Uri $scriptActionURI `
+                -Parameters $scriptActionParameters `
+                -NodeType HeadNode `
+            | Add-AzureRmHDInsightScriptAction -Name $scriptActionName `
+                -Uri $scriptActionURI `
+                -Parameters $scriptActionParameters `
+                -NodeType WorkerNode `
+            | Add-AzureRmHDInsightScriptAction -Name $scriptActionAttachName `
+                -Uri $scriptActionAttachUri `
+                -Parameters $scriptActionAttachParameters `
+                -NodeType HeadNode `
+            | New-AzureRmHDInsightCluster -OSType $clusterOS `
+                -ClusterSizeInNodes $clusterNodes `
+                -ResourceGroupName $resourceGroupName `
+                -ClusterName $clusterName `
+                -HeadNodeSize $clusterHeadSize `
+                -WorkerNodeSize $clusterNodeSize `
+                -HttpCredential $clusterCredential `
+                -SshCredential $sshCredential `
+                -Location $location `
+                -Version $hdpversion `
+                -VirtualNetworkId $VirtualNetworkId `
+                -SubnetName $SubnetName `
+                -DefaultStorageAccountName "$storageAccountName.blob.core.windows.net" `
+                -DefaultStorageAccountKey $storageAccountKey `
+                -DefaultStorageContainer $containerName 
+            
+    Write-Output "End: " 
