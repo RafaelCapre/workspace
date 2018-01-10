@@ -14,6 +14,7 @@ $storageAccountName = "analyticsprdstorage"
 $containerName = "prd01ingestion-analytics"
 $clusterName = $containerName 
 $clusterType = "Spark"
+#spark premium, waiting for hdi engage.
 $hdpversion = "3.6"
 $clusterOS = "Linux"
 $clusterNodes = 4 

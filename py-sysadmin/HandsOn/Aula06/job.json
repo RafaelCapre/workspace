@@ -1,0 +1,24 @@
+{
+"name":"Job Aula06",
+"repo":"https://github.com/AlissonMMenezes/Terminus.git",
+"steps":[
+            {"command":"apt-get install -y",
+             "params":[
+                       "python",
+                       "python-setuptools",
+                       "python-dev",
+                        "sqlite3"
+                      ]
+             },
+             {"command":"easy_install ",
+             "params":[
+                       "pyramid_mailer"
+                      ]
+             },
+             {"command":"python",
+             "params":[
+                       "setup.py install"
+                      ]
+             }
+]
+}
