@@ -30,7 +30,7 @@ def provisionamento_novo():
         db.provisionamento.insert(j)
         return jsonify({"message":"Inserido no banco com sucesso"})
     except Exception as e:
-        print "erro %s"%e
+        print ("erro %s") % e
         return jsonify({"message":"%s"%e})
 
 @app.route("/provisionamento/lista/")
@@ -41,7 +41,7 @@ def provisionamento_lista():
         lista = db.provisionamento.find({"_id":1})[0]
         return jsonify(lista)
     except Exception as e:
-        print "erro %s"%e
+        print ("erro %s") % e
         return jsonify({"message":"%s"%e})
 
 if __name__ == "__main__":
