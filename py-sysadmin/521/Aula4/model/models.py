@@ -8,8 +8,9 @@ app.config ["MONGODB_SETTINGS"] = {
     "db":"dexter-api",
     "host":"mongodb://521.documents.azure.com:10255/dexter-api?ssl=true",
     "username":"521",
-    "password":"IdN6WRwpLIx@l1XHdXwqYkXhu@dUOWogIxwgNRa7UuMDLDv6kYwH@VN3wzcTqg01Immr9dxX4KbMfMv1UNLfOFkOw=="
+    "password":"LY7yPaKzRDADfQr8FUfeGDKChDrcJwXl9IXRbumobKa2gfBJhNu8L157iywowSv1h5vG05wo7K2NbF0u983QGQ=="
 }
+
 
 db = MongoEngine(app)
 
