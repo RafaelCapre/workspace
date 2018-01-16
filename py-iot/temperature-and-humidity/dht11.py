@@ -9,6 +9,7 @@ import sys
 import Adafruit_DHT
 import time
 
+#chupaminharola
 
 key_name ="RootManageSharedAccessKey"
 key_value="-yourkeyhere-"
