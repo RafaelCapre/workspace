@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+<project>
+  <actions/>
+    <deion></deion>
+    <keepDependencies>false</keepDependencies>
+    <properties/>
+        <scm class="hudson.scm.NullSCM"/>
+            <canRoam>true</canRoam>
+            <disabled>false</disabled>
+            <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+            <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+                <triggers/>
+                    <concurrentBuild>false</concurrentBuild>
+                    <builders></builders>
+                    <publishers/></publishers>
+                    <buildWrappers/></buildWrappers>
+                </triggers>
+        </scm>
+    </properties>
+  </actions>
+</project>
