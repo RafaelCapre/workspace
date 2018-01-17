@@ -54,7 +54,7 @@ def delete_user_by_email(email):
         print(e)
     finally:    
         print("route = delete usuarios")
-        return redirect('/usuarios/ ')
+        return redirect('/usuarios/')
 
     
 

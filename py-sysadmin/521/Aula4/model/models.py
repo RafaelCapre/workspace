@@ -8,7 +8,7 @@ app.config ["MONGODB_SETTINGS"] = {
     "db":"dexter-api",
     "host":"mongodb://521.documents.azure.com:10255/dexter-api?ssl=true",
     "username":"521",
-    "password":"LY7yPaKzRDADfQr8FUfeGDKChDrcJwXl9IXRbumobKa2gfBJhNu8L157iywowSv1h5vG05wo7K2NbF0u983QGQ=="
+    "password":"OPVm6IedwD6fp1wGV0Yh2DzpX6I7nUWMXuO5EXk55eZGoYGdGiB3cbOZhKSw9ytXwcjS7mCzohgfXJotcp1twA=="
 }
 
 
