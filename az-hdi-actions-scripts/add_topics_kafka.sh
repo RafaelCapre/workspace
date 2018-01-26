@@ -5,12 +5,12 @@ ZOO=$(curl -u admin:$CLUSTER_PASS -X GET "https://"$CLUSTER_NAME".azurehdinsight
 KAFKA_HOME=/usr/hdp/current/kafka-broker/bin/
 
 #Para cria��o de um novo t�pico, basta atualizar o arquivo: 
-#"https://hdidevstorage.blob.core.windows.net/startup/topicos.txt" em formato UNX no Azure Explorer.
+#"https://$storageaccount.blob.core.windows.net/startup/topicos.txt" em formato UNX no Azure Explorer.
 
 mkdir /home/sshuser/startup/
 cd /home/sshuser/startup/
 sudo rm -rf topicos.txt
-sudo wget https://hdidevstorage.blob.core.windows.net/startup/topicos.txt 
+sudo wget https://hdiprdstorage.blob.core.windows.net/startup/action-script/topicos.txt
 md5sum /home/sshuser/startup/topicos.txt
 
 echo $ZOO	
@@ -21,8 +21,8 @@ for i in "${array[@]}"
             --zookeeper $ZOO \
             --create --if-not-exists \
             --topic $i \
-            --partitions 2 \
-            --replication-factor 2 
+            --partitions 3 \
+            --replication-factor 3 
 	done
 
 echo "*** Lista de Tópicos Criados ***"

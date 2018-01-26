@@ -7,3 +7,4 @@ remuneracao-simulacao
 remuneracao-simulacao-2
 reward-simulation
 reward-simulation-2
+bra-orders
