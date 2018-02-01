@@ -1,10 +1,11 @@
 event-management
 explosao-objetivos
 extincao-grupos
-extincao-grupos
 remuneracao
 remuneracao-simulacao
 remuneracao-simulacao-2
+remuneracao-simulacao-2-v2
 reward-simulation
 reward-simulation-2
 bra-orders
+rescisao
