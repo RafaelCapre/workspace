@@ -29,7 +29,7 @@
 
 
     $passwd = $clusterCredential.GetNetworkCredential().password
-   
+
     $passwd
 
 #3. Deploy
