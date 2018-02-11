@@ -1,9 +1,4 @@
 #!/bin/bash
-#Author - Kuldeep Kulkarni ( http://crazyadmins.com )
-#Note - Testing is still in progress for this! :)
-####################################################
-
-#Globals
 
 LOC=`pwd`
 PROP=ambari.props
